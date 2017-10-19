@@ -7,6 +7,7 @@ package lz4
 
 import (
 	"io/ioutil"
+	"reflect"
 	"strings"
 	"testing"
 	"testing/quick"
@@ -23,7 +24,7 @@ func TestCompressionHCRatio(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if want := 4317; want != outSize {
+	if want := 4354; want != outSize {
 		t.Fatalf("HC Compressed output length != expected: %d != %d", want, outSize)
 	}
 }
@@ -34,27 +35,29 @@ func TestCompressionHCLevels(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	data := make([]byte, len(input))
+
 	cases := []struct {
 		Level   int
 		Outsize int
 	}{
-		{0, 4317},
-		{1, 4415},
-		{2, 4359},
-		{3, 4339},
-		{4, 4321},
-		{5, 4317},
-		{6, 4317},
-		{7, 4317},
-		{8, 4317},
-		{9, 4317},
-		{10, 4317},
-		{11, 4317},
-		{12, 4317},
-		{13, 4317},
-		{14, 4317},
-		{15, 4317},
-		{16, 4317},
+		{0, 4354},
+		{1, 4450},
+		{2, 4395},
+		{3, 4372},
+		{4, 4358},
+		{5, 4354},
+		{6, 4354},
+		{7, 4354},
+		{8, 4354},
+		{9, 4354},
+		{10, 4354},
+		{11, 4351},
+		{12, 4351},
+		{13, 4351},
+		{14, 4351},
+		{15, 4351},
+		{16, 4351},
 	}
 
 	for _, tt := range cases {
@@ -67,6 +70,15 @@ func TestCompressionHCLevels(t *testing.T) {
 		if want := tt.Outsize; want != outSize {
 			t.Errorf("HC level %d length != expected: %d != %d",
 				tt.Level, want, outSize)
+		}
+
+		err = Uncompress(output[:outSize], data)
+		if err != nil {
+			t.Error("[Uncompress]HC level %d ,%v", tt.Level, err)
+		}
+
+		if !reflect.DeepEqual(input, data) {
+			t.Error("input!=data")
 		}
 	}
 }

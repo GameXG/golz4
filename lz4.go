@@ -26,7 +26,7 @@ func clen(s []byte) C.int {
 
 // Uncompress with a known output size. len(out) should be equal to
 // the length of the uncompressed out.
-func Uncompress(in, out []byte) (error) {
+func Uncompress(in, out []byte) error {
 	if int(C.LZ4_decompress_safe(p(in), p(out), clen(in), clen(out))) < 0 {
 		return errors.New("Malformed compression stream")
 	}
@@ -47,7 +47,7 @@ func CompressBound(in []byte) int {
 // should have enough space for the compressed data (use CompressBound
 // to calculate). Returns the number of bytes in the out slice.
 func Compress(in, out []byte) (outSize int, err error) {
-	outSize = int(C.LZ4_compress_limitedOutput(p(in), p(out), clen(in), clen(out)))
+	outSize = int(C.LZ4_compress_default(p(in), p(out), clen(in), clen(out)))
 	if outSize == 0 {
 		err = fmt.Errorf("insufficient space for compression")
 	}
